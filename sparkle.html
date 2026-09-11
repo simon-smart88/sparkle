@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sparkle — a noise instrument</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0c0d0f;
+    --panel: #161719;
+    --panel-raised: #1d1f22;
+    --line: #2b2d31;
+    --text: #d9dbde;
+    --text-dim: #83868c;
+    --accent: #ffb000;
+    --accent-dim: #6b4a00;
+    --red: #ff6b6b;
+    --green: #6bff9a;
+    --blue: #6bb3ff;
+    --density: #b9bdc4;
+    --alphacol: #f2f3f5;
+    --sizecol: #c9a6ff;
+    --danger: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    overflow: hidden;
+  }
+
+  header {
+    padding: 18px 24px 10px;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+  header p {
+    margin: 0;
+    max-width: 68ch;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  header a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-dim); }
+  header a:hover { border-bottom-color: var(--accent); }
+
+  main {
+    flex: 1;
+    display: flex;
+    gap: 0;
+    min-height: 0;
+  }
+
+  .panel {
+    width: 320px;
+    flex-shrink: 0;
+    background: var(--panel);
+    overflow-y: auto;
+  }
+  .panel-left { border-right: 1px solid var(--line); padding: 4px 0 24px; }
+  .panel-right { border-left: 1px solid var(--line); display: flex; flex-direction: column; }
+
+  .stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    min-width: 0;
+    min-height: 0;
+  }
+  .canvas-frame {
+    position: relative;
+    background: #000;
+    border: 1px solid var(--line);
+    box-shadow: 0 0 0 8px var(--panel), 0 0 40px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+  }
+  #sparkleCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    image-rendering: pixelated;
+  }
+  .canvas-frame::after{
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.12) 0px,
+      rgba(0,0,0,0.12) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode: multiply;
+    opacity: 0.35;
+  }
+
+  .group {
+    border-bottom: 1px solid var(--line);
+  }
+  .group > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 12px 20px;
+    font-size: 12px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+    gap: 8px;
+  }
+  .group > summary::-webkit-details-marker { display: none; }
+  .group > summary .label { display: flex; align-items: center; min-width: 0; }
+  .group > summary .live {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-right: 8px;
+    white-space: nowrap;
+  }
+  .group > summary::after {
+    content: "+";
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  .group[open] > summary::after { content: "–"; }
+  .group .swatch {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+  .group-body {
+    padding: 4px 20px 16px;
+  }
+
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 4px; }
+  .field-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .field-label span.val { color: var(--text); }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 2px;
+    background: var(--line);
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    margin-top: -5px;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border: none;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+  input[type="range"]::-moz-range-track {
+    height: 2px;
+    background: var(--line);
+  }
+
+  select.shape {
+    width: 100%;
+    background: var(--panel-raised);
+    color: var(--text);
+    border: 1px solid var(--line);
+    padding: 6px 8px;
+    font-family: inherit;
+    font-size: 12px;
+    border-radius: 2px;
+  }
+
+  .scope {
+    margin: 4px 20px 20px;
+    border: 1px solid var(--line);
+    background: #000;
+  }
+  canvas#scopeCanvas { display: block; width: 100%; height: 90px; }
+
+  /* --- Presets panel --- */
+  .panel-right-header {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .panel-right-header .title {
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .save-row {
+    display: flex;
+    gap: 6px;
+  }
+  .save-row input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 7px 8px;
+    border-radius: 2px;
+  }
+  .save-row input[type="text"]:focus { outline: 1px solid var(--accent-dim); }
+  .save-row button {
+    background: var(--accent-dim);
+    color: #ffe1a3;
+    border: 1px solid var(--accent-dim);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 0 12px;
+    border-radius: 2px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .save-row button:hover { background: var(--accent); color: #1a1200; }
+
+  .preset-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 0;
+  }
+  .preset-empty {
+    padding: 20px;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .preset-item {
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .preset-item .meta { flex: 1; min-width: 0; }
+  .preset-item .name {
+    font-size: 12px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .preset-item .time {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .preset-item .actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .preset-item button {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 10px;
+    padding: 5px 9px;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .preset-item button.restore:hover { border-color: var(--accent); color: var(--accent); }
+  .preset-item button.delete:hover { border-color: var(--danger); color: var(--danger); }
+  .cookie-note {
+    padding: 8px 20px 14px;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    border-bottom: 1px solid var(--line);
+  }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--panel); }
+  ::-webkit-scrollbar-thumb { background: var(--line); }
+
+  @media (max-width: 900px) {
+    main { flex-direction: column; overflow-y: auto; }
+    body { overflow: auto; }
+    .panel { width: 100%; }
+    .panel-left { border-right: none; border-bottom: 1px solid var(--line); }
+    .panel-right { border-left: none; border-top: 1px solid var(--line); }
+    .stage { padding: 16px; order: -1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Sparkle</h1>
+  <p>
+    A field of randomly coloured squares, redrawn one noisy patch at a time. Inspired by a
+    <a href="http://www.timhead.net/art/art2000/81sce.htm" target="_blank" rel="noopener">Tim Head piece</a>,
+    built by <a href="https://glowinthedark.co.uk/" target="_blank" rel="noopener">Paul Harter</a>. Every channel —
+    red, green, blue, grid resolution, how many pixels change each frame, and how transparent they are — drifts
+    on its own wave. Save a setup you like to the list on the right.
+  </p>
+</header>
+
+<main>
+  <aside class="panel panel-left">
+    <details class="group" open>
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--accent)"></span>Pattern</span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Wave speed</span><span class="val" id="val-speed">1.00×</span></div>
+          <input type="range" id="speed" min="0" max="4" step="0.05" value="1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Quantize levels (RGB only)</span><span class="val" id="val-quantize">off</span></div>
+          <input type="range" id="quantize" min="0" max="32" step="1" value="0">
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--sizecol)"></span>Grid size</span>
+        <span class="live" id="cs-live">100px</span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean (pixels per side)</span><span class="val" id="val-cs_mean">100</span></div>
+          <input type="range" id="cs_mean" min="100" max="2000" step="5" value="100">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-cs_amplitude">0</span></div>
+          <input type="range" id="cs_amplitude" min="0" max="950" step="5" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-cs_frequency">0.10</span></div>
+          <input type="range" id="cs_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-cs_phase">0.00</span></div>
+          <input type="range" id="cs_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="cs_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--red)"></span>Red</span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean</span><span class="val" id="val-r_mean">128</span></div>
+          <input type="range" id="r_mean" min="1" max="256" step="1" value="128">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-r_amplitude">1</span></div>
+          <input type="range" id="r_amplitude" min="0" max="128" step="1" value="1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-r_frequency">0.10</span></div>
+          <input type="range" id="r_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-r_phase">0.00</span></div>
+          <input type="range" id="r_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="r_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--green)"></span>Green</span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean</span><span class="val" id="val-g_mean">128</span></div>
+          <input type="range" id="g_mean" min="1" max="256" step="1" value="128">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-g_amplitude">1</span></div>
+          <input type="range" id="g_amplitude" min="0" max="128" step="1" value="1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-g_frequency">0.10</span></div>
+          <input type="range" id="g_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-g_phase">0.00</span></div>
+          <input type="range" id="g_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="g_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--blue)"></span>Blue</span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean</span><span class="val" id="val-b_mean">128</span></div>
+          <input type="range" id="b_mean" min="1" max="256" step="1" value="128">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-b_amplitude">1</span></div>
+          <input type="range" id="b_amplitude" min="0" max="128" step="1" value="1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-b_frequency">0.10</span></div>
+          <input type="range" id="b_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-b_phase">0.00</span></div>
+          <input type="range" id="b_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="b_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--density)"></span>Density</span>
+        <span class="live" id="pp-live">10.0%</span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean (% pixels / frame)</span><span class="val" id="val-pp_mean">10</span></div>
+          <input type="range" id="pp_mean" min="0.1" max="100" step="0.1" value="10">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-pp_amplitude">0</span></div>
+          <input type="range" id="pp_amplitude" min="0" max="50" step="0.1" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-pp_frequency">0.10</span></div>
+          <input type="range" id="pp_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-pp_phase">0.00</span></div>
+          <input type="range" id="pp_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="pp_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--alphacol)"></span>Transparency</span>
+        <span class="live" id="ap-live">128</span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean</span><span class="val" id="val-ap_mean">128</span></div>
+          <input type="range" id="ap_mean" min="1" max="256" step="1" value="128">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-ap_amplitude">0</span></div>
+          <input type="range" id="ap_amplitude" min="0" max="128" step="1" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-ap_frequency">0.10</span></div>
+          <input type="range" id="ap_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-ap_phase">0.00</span></div>
+          <input type="range" id="ap_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="ap_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <div class="scope">
+      <canvas id="scopeCanvas" width="300" height="90"></canvas>
+    </div>
+  </aside>
+
+  <div class="stage">
+    <div class="canvas-frame">
+      <canvas id="sparkleCanvas" width="100" height="100"></canvas>
+    </div>
+  </div>
+
+  <aside class="panel panel-right">
+    <div class="panel-right-header">
+      <div class="title">Presets</div>
+      <div class="save-row">
+        <input type="text" id="presetName" placeholder="Name this setup" maxlength="60">
+        <button id="savePresetBtn">Save current</button>
+      </div>
+    </div>
+    <div class="cookie-note" id="cookieNote">Saved as a browser cookie on this device.</div>
+    <div class="preset-list" id="presetList">
+      <div class="preset-empty">No saved setups yet. Adjust the controls, name them, and save.</div>
+    </div>
+  </aside>
+</main>
+
+<script>
+(function(){
+  const visCanvas = document.getElementById('sparkleCanvas');
+  const visCtx = visCanvas.getContext('2d');
+  const scope = document.getElementById('scopeCanvas');
+  const sctx = scope.getContext('2d');
+  const stage = document.querySelector('.stage');
+  const frame = document.querySelector('.canvas-frame');
+
+  // --- Fixed backing grid --------------------------------------------------
+  // The "true" pixel data lives here, at a size that comfortably covers the
+  // whole grid-size wave range (100-2000, mean+amplitude clamped to 2000).
+  // It is allocated once and never resized — growing or shrinking the visible
+  // grid never touches this buffer's dimensions, only how much of its centre
+  // we look at.
+  const BACKING_SIZE = 2000;
+  const CENTER = BACKING_SIZE / 2;
+  const dataCanvas = document.createElement('canvas');
+  dataCanvas.width = BACKING_SIZE;
+  dataCanvas.height = BACKING_SIZE;
+  const dataCtx = dataCanvas.getContext('2d');
+  const backingImageData = dataCtx.createImageData(BACKING_SIZE, BACKING_SIZE);
+  let filledSize = 0; // how large a centred square has ever been randomized
+
+  function offsetFor(N){ return Math.floor(CENTER - N / 2); }
+
+  let r_range = 128, g_range = 128, b_range = 128;
+
+  const state = {
+    r_mean: 128, r_amplitude: 1, r_frequency: 0.1, r_phase: 0, r_shape: 'sine',
+    g_mean: 128, g_amplitude: 1, g_frequency: 0.1, g_phase: 0, g_shape: 'sine',
+    b_mean: 128, b_amplitude: 1, b_frequency: 0.1, b_phase: 0, b_shape: 'sine',
+    pp_mean: 10, pp_amplitude: 0, pp_frequency: 0.1, pp_phase: 0, pp_shape: 'sine',
+    ap_mean: 128, ap_amplitude: 0, ap_frequency: 0.1, ap_phase: 0, ap_shape: 'sine',
+    cs_mean: 100, cs_amplitude: 0, cs_frequency: 0.1, cs_phase: 0, cs_shape: 'sine',
+    pixelUpdatePercent: 10, alpha: 128, speed: 1, quantize: 0
+  };
+
+  // --- Responsive square canvas frame -------------------------------------
+  // Only the *display* resolution changes here, and only on an actual window
+  // resize — not on every grid-size wave tick.
+  function sizeFrame(){
+    const rect = stage.getBoundingClientRect();
+    const pad = 8;
+    const available = Math.max(120, Math.min(rect.width, rect.height) - pad * 2);
+    const cssSize = Math.floor(available);
+    frame.style.width = cssSize + 'px';
+    frame.style.height = cssSize + 'px';
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const intrinsic = Math.max(200, Math.min(1400, Math.round(cssSize * dpr)));
+    if (visCanvas.width !== intrinsic){
+      visCanvas.width = intrinsic;
+      visCanvas.height = intrinsic;
+    }
+  }
+  new ResizeObserver(sizeFrame).observe(stage);
+  window.addEventListener('resize', sizeFrame);
+  sizeFrame();
+
+  // --- Waveform shapes ------------------------------------------------------
+  function shapeValue(shape, x){
+    const f = x - Math.floor(x);
+    switch (shape){
+      case 'triangle':
+        return 4 * Math.abs(f - Math.floor(f + 0.5)) - 1;
+      case 'square':
+        return f < 0.5 ? 1 : -1;
+      case 'sawtooth':
+        return 2 * f - 1;
+      case 'sine':
+      default:
+        return Math.sin(2 * Math.PI * f);
+    }
+  }
+
+  function clampRange(v, min, max){ return Math.max(min, Math.min(max, v)); }
+  function clamp255(v){ return clampRange(v, 0, 255); }
+
+  function quantizeValue(v){
+    const steps = state.quantize;
+    if (!steps) return v;
+    const levelSize = 255 / steps;
+    return Math.round(v / levelSize) * levelSize;
+  }
+
+  function setRandomPixel(x, y){
+    const idx = (y * BACKING_SIZE + x) * 4;
+    backingImageData.data[idx]     = Math.floor(Math.random() * r_range);
+    backingImageData.data[idx + 1] = Math.floor(Math.random() * g_range);
+    backingImageData.data[idx + 2] = Math.floor(Math.random() * b_range);
+    backingImageData.data[idx + 3] = state.alpha;
+  }
+
+  // Randomize only the newly-exposed ring when the visible (centred) grid
+  // grows past its previous all-time max. Pixels already generated (even if
+  // currently hidden by a later shrink) are left untouched.
+  function ensureFilled(N){
+    if (N <= filledSize) return;
+    const oldSize = filledSize;
+    const offNew = offsetFor(N);
+    const offOld = offsetFor(oldSize);
+    for (let y = offNew; y < offNew + N; y++){
+      for (let x = offNew; x < offNew + N; x++){
+        if (oldSize > 0 && x >= offOld && x < offOld + oldSize && y >= offOld && y < offOld + oldSize) continue;
+        setRandomPixel(x, y);
+      }
+    }
+    filledSize = N;
+    dataCtx.putImageData(backingImageData, 0, 0, offNew, offNew, N, N);
+  }
+
+  let clockOffset = 0;
+  let lastRealTime = Date.now() / 1000;
+  function tick(){
+    const now = Date.now() / 1000;
+    const dt = now - lastRealTime;
+    lastRealTime = now;
+    clockOffset += dt * state.speed;
+    return clockOffset;
+  }
+
+  // RGB channel value: 0-255, clamped and (optionally) quantized
+  function channelValue(mean, amp, freq, phase, shape, t){
+    const wave = shapeValue(shape, t * freq + phase);
+    return quantizeValue(clamp255(Math.round(mean + amp * wave)));
+  }
+
+  // Pixel-update-percent value: 0.1-100, no quantize
+  function percentValue(t){
+    const wave = shapeValue(state.pp_shape, t * state.pp_frequency + state.pp_phase);
+    return clampRange(state.pp_mean + state.pp_amplitude * wave, 0.1, 100);
+  }
+
+  // Transparency (alpha) value: 1-256, no quantize
+  function alphaValue(t){
+    const wave = shapeValue(state.ap_shape, t * state.ap_frequency + state.ap_phase);
+    return clampRange(Math.round(state.ap_mean + state.ap_amplitude * wave), 1, 256);
+  }
+
+  // Grid-size (pixels per side) value: 100-2000, rounded to the nearest 5
+  function sizeValue(t){
+    const wave = shapeValue(state.cs_shape, t * state.cs_frequency + state.cs_phase);
+    const raw = clampRange(state.cs_mean + state.cs_amplitude * wave, 100, 2000);
+    return Math.round(raw / 5) * 5;
+  }
+
+  function updateColorRanges(t){
+    r_range = channelValue(state.r_mean, state.r_amplitude, state.r_frequency, state.r_phase, state.r_shape, t);
+    g_range = channelValue(state.g_mean, state.g_amplitude, state.g_frequency, state.g_phase, state.g_shape, t);
+    b_range = channelValue(state.b_mean, state.b_amplitude, state.b_frequency, state.b_phase, state.b_shape, t);
+    state.pixelUpdatePercent = percentValue(t);
+    state.alpha = alphaValue(t);
+  }
+
+  const ppLive = document.getElementById('pp-live');
+  const apLive = document.getElementById('ap-live');
+  const csLive = document.getElementById('cs-live');
+
+  function updateRandomPixels(){
+    const t = tick();
+    updateColorRanges(t);
+
+    const targetSize = sizeValue(t);
+    ensureFilled(targetSize);
+    const offset = offsetFor(targetSize);
+    csLive.textContent = targetSize + 'px';
+    ppLive.textContent = state.pixelUpdatePercent.toFixed(1) + '%';
+    apLive.textContent = Math.round(state.alpha);
+
+    const totalPixels = targetSize * targetSize;
+    const pixelsToUpdate = Math.round((state.pixelUpdatePercent / 100) * totalPixels);
+
+    for (let n = 0; n < pixelsToUpdate; n++){
+      const x = offset + Math.floor(Math.random() * targetSize);
+      const y = offset + Math.floor(Math.random() * targetSize);
+      setRandomPixel(x, y);
+    }
+    // Only push the currently-visible centred N x N square to the backing
+    // canvas — cost scales with what's on screen, not the 2000x2000 buffer.
+    dataCtx.putImageData(backingImageData, 0, 0, offset, offset, targetSize, targetSize);
+
+    // Crop that centred square and scale it up (nearest-neighbour) onto the visible canvas.
+    visCtx.imageSmoothingEnabled = false;
+    visCtx.drawImage(dataCanvas, offset, offset, targetSize, targetSize, 0, 0, visCanvas.width, visCanvas.height);
+
+    drawScope(t);
+    requestAnimationFrame(updateRandomPixels);
+  }
+
+  // Live oscilloscope-style preview of the RGB waveforms, plus density,
+  // transparency and grid size overlaid as dashed traces (each normalised
+  // to its own range so they stay legible on one chart).
+  function drawScope(t0){
+    const w = scope.width, h = scope.height;
+    sctx.clearRect(0, 0, w, h);
+
+    sctx.strokeStyle = '#1f2023';
+    sctx.lineWidth = 1;
+    sctx.beginPath();
+    sctx.moveTo(0, h / 2);
+    sctx.lineTo(w, h / 2);
+    sctx.stroke();
+
+    const windowSeconds = 6;
+    const channels = [
+      { mean: state.r_mean, amp: state.r_amplitude, freq: state.r_frequency, phase: state.r_phase, shape: state.r_shape, color: getCss('--red') },
+      { mean: state.g_mean, amp: state.g_amplitude, freq: state.g_frequency, phase: state.g_phase, shape: state.g_shape, color: getCss('--green') },
+      { mean: state.b_mean, amp: state.b_amplitude, freq: state.b_frequency, phase: state.b_phase, shape: state.b_shape, color: getCss('--blue') }
+    ];
+
+    channels.forEach(c => {
+      sctx.beginPath();
+      sctx.strokeStyle = c.color;
+      sctx.lineWidth = 1.5;
+      for (let px = 0; px <= w; px++){
+        const t = t0 - windowSeconds + (px / w) * windowSeconds;
+        const v = channelValue(c.mean, c.amp, c.freq, c.phase, c.shape, t);
+        const y = h - (v / 255) * h;
+        if (px === 0) sctx.moveTo(px, y); else sctx.lineTo(px, y);
+      }
+      sctx.stroke();
+    });
+
+    sctx.setLineDash([3, 3]);
+
+    sctx.beginPath();
+    sctx.strokeStyle = getCss('--density');
+    sctx.lineWidth = 1;
+    for (let px = 0; px <= w; px++){
+      const t = t0 - windowSeconds + (px / w) * windowSeconds;
+      const wave = shapeValue(state.pp_shape, t * state.pp_frequency + state.pp_phase);
+      const v = clampRange(state.pp_mean + state.pp_amplitude * wave, 0.1, 100);
+      const y = h - (v / 100) * h;
+      if (px === 0) sctx.moveTo(px, y); else sctx.lineTo(px, y);
+    }
+    sctx.stroke();
+
+    sctx.beginPath();
+    sctx.strokeStyle = getCss('--alphacol');
+    sctx.lineWidth = 1;
+    for (let px = 0; px <= w; px++){
+      const t = t0 - windowSeconds + (px / w) * windowSeconds;
+      const wave = shapeValue(state.ap_shape, t * state.ap_frequency + state.ap_phase);
+      const v = clampRange(state.ap_mean + state.ap_amplitude * wave, 1, 256);
+      const y = h - (v / 256) * h;
+      if (px === 0) sctx.moveTo(px, y); else sctx.lineTo(px, y);
+    }
+    sctx.stroke();
+
+    sctx.beginPath();
+    sctx.strokeStyle = getCss('--sizecol');
+    sctx.lineWidth = 1;
+    for (let px = 0; px <= w; px++){
+      const t = t0 - windowSeconds + (px / w) * windowSeconds;
+      const wave = shapeValue(state.cs_shape, t * state.cs_frequency + state.cs_phase);
+      const v = clampRange(state.cs_mean + state.cs_amplitude * wave, 100, 2000);
+      const y = h - ((v - 100) / 1900) * h;
+      if (px === 0) sctx.moveTo(px, y); else sctx.lineTo(px, y);
+    }
+    sctx.stroke();
+
+    sctx.setLineDash([]);
+  }
+
+  function getCss(varName){
+    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  }
+
+  // --- Wire up controls -------------------------------------------------
+  const controlIds = [
+    'speed', 'quantize',
+    'cs_mean', 'cs_amplitude', 'cs_frequency', 'cs_phase', 'cs_shape',
+    'r_mean', 'r_amplitude', 'r_frequency', 'r_phase', 'r_shape',
+    'g_mean', 'g_amplitude', 'g_frequency', 'g_phase', 'g_shape',
+    'b_mean', 'b_amplitude', 'b_frequency', 'b_phase', 'b_shape',
+    'pp_mean', 'pp_amplitude', 'pp_frequency', 'pp_phase', 'pp_shape',
+    'ap_mean', 'ap_amplitude', 'ap_frequency', 'ap_phase', 'ap_shape'
+  ];
+
+  function bindRange(id, onChange, formatter){
+    const input = document.getElementById(id);
+    const label = document.getElementById('val-' + id);
+    input.addEventListener('input', () => {
+      const raw = input.value;
+      if (label) label.textContent = formatter ? formatter(raw) : raw;
+      onChange(raw);
+    });
+  }
+  function bindSelect(id, onChange){
+    document.getElementById(id).addEventListener('change', e => onChange(e.target.value));
+  }
+
+  bindRange('speed', v => state.speed = parseFloat(v), v => parseFloat(v).toFixed(2) + '×');
+  bindRange('quantize', v => state.quantize = parseInt(v), v => v === '0' ? 'off' : v);
+
+  bindRange('cs_mean', v => state.cs_mean = parseInt(v));
+  bindRange('cs_amplitude', v => state.cs_amplitude = parseInt(v));
+  bindRange('cs_frequency', v => state.cs_frequency = parseFloat(v), v => parseFloat(v).toFixed(2));
+  bindRange('cs_phase', v => state.cs_phase = parseFloat(v), v => parseFloat(v).toFixed(2));
+  bindSelect('cs_shape', v => state.cs_shape = v);
+
+  ['r', 'g', 'b'].forEach(ch => {
+    bindRange(`${ch}_mean`, v => state[`${ch}_mean`] = parseInt(v));
+    bindRange(`${ch}_amplitude`, v => state[`${ch}_amplitude`] = parseInt(v));
+    bindRange(`${ch}_frequency`, v => state[`${ch}_frequency`] = parseFloat(v), v => parseFloat(v).toFixed(2));
+    bindRange(`${ch}_phase`, v => state[`${ch}_phase`] = parseFloat(v), v => parseFloat(v).toFixed(2));
+    bindSelect(`${ch}_shape`, v => state[`${ch}_shape`] = v);
+  });
+
+  bindRange('pp_mean', v => state.pp_mean = parseFloat(v));
+  bindRange('pp_amplitude', v => state.pp_amplitude = parseFloat(v));
+  bindRange('pp_frequency', v => state.pp_frequency = parseFloat(v), v => parseFloat(v).toFixed(2));
+  bindRange('pp_phase', v => state.pp_phase = parseFloat(v), v => parseFloat(v).toFixed(2));
+  bindSelect('pp_shape', v => state.pp_shape = v);
+
+  bindRange('ap_mean', v => state.ap_mean = parseInt(v));
+  bindRange('ap_amplitude', v => state.ap_amplitude = parseInt(v));
+  bindRange('ap_frequency', v => state.ap_frequency = parseFloat(v), v => parseFloat(v).toFixed(2));
+  bindRange('ap_phase', v => state.ap_phase = parseFloat(v), v => parseFloat(v).toFixed(2));
+  bindSelect('ap_shape', v => state.ap_shape = v);
+
+  // Only one settings panel open at a time (mirrors the old accordion behaviour)
+  const groups = document.querySelectorAll('.group');
+  groups.forEach(g => {
+    g.addEventListener('toggle', () => {
+      if (g.open){
+        groups.forEach(other => { if (other !== g) other.open = false; });
+      }
+    });
+  });
+
+  // --- Presets: capture / apply / persist (as a cookie) ------------------
+  const COOKIE_NAME = 'sparklePresets';
+  const COOKIE_MAX_BYTES = 3800; // stay comfortably under the ~4KB per-cookie limit
+
+  function getCookie(name){
+    const escaped = name.replace(/([.$?*|{}()\[\]\\/+^])/g, '\\$1');
+    const match = document.cookie.match(new RegExp('(?:^|; )' + escaped + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+  function setCookie(name, value, days){
+    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+  }
+
+  const cookiesAvailable = (() => {
+    try {
+      document.cookie = 'sparkleCookieTest=1; path=/; SameSite=Lax';
+      const ok = document.cookie.indexOf('sparkleCookieTest=') !== -1;
+      document.cookie = 'sparkleCookieTest=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      return ok;
+    } catch (e){
+      return false;
+    }
+  })();
+  let memoryPresets = []; // fallback if cookies aren't available (e.g. some local file:// views)
+
+  if (!cookiesAvailable){
+    document.getElementById('cookieNote').textContent =
+      "Cookies aren't available here, so saved setups will only last this session.";
+  }
+
+  function captureCurrentSettings(){
+    const snapshot = {};
+    controlIds.forEach(id => { snapshot[id] = document.getElementById(id).value; });
+    return snapshot;
+  }
+
+  function applySettings(settings){
+    controlIds.forEach(id => {
+      if (!(id in settings)) return;
+      const el = document.getElementById(id);
+      el.value = settings[id];
+      el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input'));
+    });
+  }
+
+  async function loadPresets(){
+    if (!cookiesAvailable) return memoryPresets;
+    try {
+      const raw = getCookie(COOKIE_NAME);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e){
+      return [];
+    }
+  }
+
+  // Returns the (possibly trimmed) list actually persisted, since cookies
+  // have a hard ~4KB size limit — oldest presets are dropped first if needed.
+  async function persistPresets(list){
+    if (!cookiesAvailable){
+      memoryPresets = list;
+      return list;
+    }
+    const trimmed = list.slice();
+    let serialized = JSON.stringify(trimmed);
+    while (serialized.length > COOKIE_MAX_BYTES && trimmed.length > 0){
+      trimmed.shift();
+      serialized = JSON.stringify(trimmed);
+    }
+    try {
+      setCookie(COOKIE_NAME, serialized, 365 * 5);
+    } catch (e){
+      console.error('Could not save presets cookie', e);
+    }
+    return trimmed;
+  }
+
+  function formatTime(ts){
+    const d = new Date(ts);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' · ' +
+      d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  function renderPresets(list){
+    const container = document.getElementById('presetList');
+    container.innerHTML = '';
+    if (!list.length){
+      const empty = document.createElement('div');
+      empty.className = 'preset-empty';
+      empty.textContent = 'No saved setups yet. Adjust the controls, name them, and save.';
+      container.appendChild(empty);
+      return;
+    }
+    list.slice().reverse().forEach(preset => {
+      const item = document.createElement('div');
+      item.className = 'preset-item';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = preset.name;
+      const time = document.createElement('div');
+      time.className = 'time';
+      time.textContent = formatTime(preset.savedAt);
+      meta.appendChild(name);
+      meta.appendChild(time);
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      const restoreBtn = document.createElement('button');
+      restoreBtn.className = 'restore';
+      restoreBtn.textContent = 'Restore';
+      restoreBtn.addEventListener('click', () => applySettings(preset.values));
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete';
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.addEventListener('click', async () => {
+        const updated = (await loadPresets()).filter(p => p.id !== preset.id);
+        const saved = await persistPresets(updated);
+        renderPresets(saved);
+      });
+      actions.appendChild(restoreBtn);
+      actions.appendChild(deleteBtn);
+
+      item.appendChild(meta);
+      item.appendChild(actions);
+      container.appendChild(item);
+    });
+  }
+
+  document.getElementById('savePresetBtn').addEventListener('click', async () => {
+    const nameInput = document.getElementById('presetName');
+    const name = nameInput.value.trim() || `Setup ${new Date().toLocaleTimeString()}`;
+    const preset = {
+      id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)),
+      name,
+      savedAt: Date.now(),
+      values: captureCurrentSettings()
+    };
+    const list = await loadPresets();
+    list.push(preset);
+    const saved = await persistPresets(list);
+    renderPresets(saved);
+    nameInput.value = '';
+  });
+
+  document.getElementById('presetName').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('savePresetBtn').click();
+  });
+
+  loadPresets().then(renderPresets);
+
+  updateRandomPixels();
+})();
+</script>
+
+</body>
+</html>
