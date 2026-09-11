@@ -133,10 +133,10 @@
   }
   .group > summary::-webkit-details-marker { display: none; }
   .group > summary .label { display: flex; align-items: center; min-width: 0; }
+  .group > summary .summary-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .group > summary .live {
     font-size: 11px;
     color: var(--text-dim);
-    margin-right: 8px;
     white-space: nowrap;
   }
   .group > summary::after {
@@ -145,6 +145,17 @@
     font-size: 13px;
   }
   .group[open] > summary::after { content: "–"; }
+  .dice-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    font-size: 11px;
+    line-height: 1;
+    padding: 4px 6px;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .dice-btn:hover { border-color: var(--accent); color: var(--accent); }
   .group .swatch {
     display: inline-block;
     width: 8px; height: 8px;
@@ -214,6 +225,26 @@
   }
   canvas#scopeCanvas { display: block; width: 100%; height: 90px; }
 
+  /* --- Randomize all --- */
+  .randomize-all-row {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .randomize-all-btn {
+    width: 100%;
+    background: var(--accent-dim);
+    color: #ffe1a3;
+    border: 1px solid var(--accent-dim);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 10px 12px;
+    border-radius: 2px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .randomize-all-btn:hover { background: var(--accent); color: #1a1200; }
+
   /* --- Presets panel --- */
   .panel-right-header {
     padding: 12px 20px;
@@ -225,6 +256,29 @@
     color: var(--text);
     margin-bottom: 10px;
   }
+  .panel-right-header .subtitle {
+    font-size: 10.5px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 14px 0 8px;
+  }
+  .builtin-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .builtin-presets button {
+    background: var(--panel-raised);
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .builtin-presets button:hover { border-color: var(--accent); color: var(--accent); }
   .save-row {
     display: flex;
     gap: 6px;
@@ -339,6 +393,9 @@
 
 <main>
   <aside class="panel panel-left">
+    <div class="randomize-all-row">
+      <button type="button" id="randomizeAllBtn" class="randomize-all-btn">🎲 Randomize all</button>
+    </div>
     <details class="group" open>
       <summary>
         <span class="label"><span class="swatch" style="background:var(--accent)"></span>Pattern</span>
@@ -358,7 +415,10 @@
     <details class="group">
       <summary>
         <span class="label"><span class="swatch" style="background:var(--sizecol)"></span>Grid size</span>
-        <span class="live" id="cs-live">100px</span>
+        <span class="summary-right">
+          <span class="live" id="cs-live">100px</span>
+          <button type="button" class="dice-btn" data-randomize-group title="Randomize grid size">🎲</button>
+        </span>
       </summary>
       <div class="group-body">
         <div class="field">
@@ -392,6 +452,9 @@
     <details class="group">
       <summary>
         <span class="label"><span class="swatch" style="background:var(--red)"></span>Red</span>
+        <span class="summary-right">
+          <button type="button" class="dice-btn" data-randomize-group title="Randomize red">🎲</button>
+        </span>
       </summary>
       <div class="group-body">
         <div class="field">
@@ -425,6 +488,9 @@
     <details class="group">
       <summary>
         <span class="label"><span class="swatch" style="background:var(--green)"></span>Green</span>
+        <span class="summary-right">
+          <button type="button" class="dice-btn" data-randomize-group title="Randomize green">🎲</button>
+        </span>
       </summary>
       <div class="group-body">
         <div class="field">
@@ -458,6 +524,9 @@
     <details class="group">
       <summary>
         <span class="label"><span class="swatch" style="background:var(--blue)"></span>Blue</span>
+        <span class="summary-right">
+          <button type="button" class="dice-btn" data-randomize-group title="Randomize blue">🎲</button>
+        </span>
       </summary>
       <div class="group-body">
         <div class="field">
@@ -491,7 +560,10 @@
     <details class="group">
       <summary>
         <span class="label"><span class="swatch" style="background:var(--density)"></span>Density</span>
-        <span class="live" id="pp-live">10.0%</span>
+        <span class="summary-right">
+          <span class="live" id="pp-live">10.0%</span>
+          <button type="button" class="dice-btn" data-randomize-group title="Randomize density">🎲</button>
+        </span>
       </summary>
       <div class="group-body">
         <div class="field">
@@ -525,7 +597,10 @@
     <details class="group">
       <summary>
         <span class="label"><span class="swatch" style="background:var(--alphacol)"></span>Transparency</span>
-        <span class="live" id="ap-live">128</span>
+        <span class="summary-right">
+          <span class="live" id="ap-live">128</span>
+          <button type="button" class="dice-btn" data-randomize-group title="Randomize transparency">🎲</button>
+        </span>
       </summary>
       <div class="group-body">
         <div class="field">
@@ -570,6 +645,9 @@
   <aside class="panel panel-right">
     <div class="panel-right-header">
       <div class="title">Presets</div>
+      <div class="subtitle">Quick start</div>
+      <div class="builtin-presets" id="builtinPresets"></div>
+      <div class="subtitle">Save current</div>
       <div class="save-row">
         <input type="text" id="presetName" placeholder="Name this setup" maxlength="60">
         <button id="savePresetBtn">Save current</button>
@@ -904,6 +982,41 @@
   bindRange('ap_phase', v => state.ap_phase = parseFloat(v), v => parseFloat(v).toFixed(2));
   bindSelect('ap_shape', v => state.ap_shape = v);
 
+  // --- Randomize -----------------------------------------------------------
+  function randomizeElement(el){
+    if (el.tagName === 'SELECT'){
+      el.selectedIndex = Math.floor(Math.random() * el.options.length);
+      el.dispatchEvent(new Event('change'));
+    } else if (el.type === 'range'){
+      const min = parseFloat(el.min);
+      const max = parseFloat(el.max);
+      const step = parseFloat(el.step) || 1;
+      const steps = Math.round((max - min) / step);
+      const value = min + Math.floor(Math.random() * (steps + 1)) * step;
+      el.value = Math.round(value * 1000) / 1000;
+      el.dispatchEvent(new Event('input'));
+    }
+  }
+
+  function randomizeIds(ids){
+    ids.forEach(id => randomizeElement(document.getElementById(id)));
+  }
+
+  document.getElementById('randomizeAllBtn').addEventListener('click', () => {
+    randomizeIds(controlIds);
+  });
+
+  document.querySelectorAll('[data-randomize-group]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const group = btn.closest('.group');
+      const ids = Array.from(group.querySelectorAll('.group-body input[type="range"], .group-body select'))
+        .map(el => el.id);
+      randomizeIds(ids);
+    });
+  });
+
   // Only one settings panel open at a time (mirrors the old accordion behaviour)
   const groups = document.querySelectorAll('.group');
   groups.forEach(g => {
@@ -913,6 +1026,94 @@
       }
     });
   });
+
+  // --- Built-in presets ---------------------------------------------------
+  const builtinPresets = [
+    {
+      name: 'Calm drift',
+      values: {
+        speed: '0.3', quantize: '0',
+        cs_mean: '600', cs_amplitude: '100', cs_frequency: '0.03', cs_phase: '0', cs_shape: 'sine',
+        r_mean: '90', r_amplitude: '15', r_frequency: '0.04', r_phase: '0', r_shape: 'sine',
+        g_mean: '120', g_amplitude: '15', g_frequency: '0.05', g_phase: '0.2', g_shape: 'sine',
+        b_mean: '170', b_amplitude: '15', b_frequency: '0.03', b_phase: '0.4', b_shape: 'sine',
+        pp_mean: '3', pp_amplitude: '1.5', pp_frequency: '0.04', pp_phase: '0', pp_shape: 'sine',
+        ap_mean: '150', ap_amplitude: '20', ap_frequency: '0.03', ap_phase: '0', ap_shape: 'sine'
+      }
+    },
+    {
+      name: 'Chaos storm',
+      values: {
+        speed: '3.5', quantize: '0',
+        cs_mean: '300', cs_amplitude: '250', cs_frequency: '0.6', cs_phase: '0', cs_shape: 'square',
+        r_mean: '128', r_amplitude: '128', r_frequency: '0.8', r_phase: '0', r_shape: 'square',
+        g_mean: '128', g_amplitude: '128', g_frequency: '0.7', g_phase: '0.3', g_shape: 'sawtooth',
+        b_mean: '128', b_amplitude: '128', b_frequency: '0.9', b_phase: '0.6', b_shape: 'triangle',
+        pp_mean: '60', pp_amplitude: '40', pp_frequency: '0.5', pp_phase: '0', pp_shape: 'square',
+        ap_mean: '180', ap_amplitude: '80', ap_frequency: '0.6', ap_phase: '0', ap_shape: 'sawtooth'
+      }
+    },
+    {
+      name: 'Embers',
+      values: {
+        speed: '0.5', quantize: '0',
+        cs_mean: '250', cs_amplitude: '50', cs_frequency: '0.05', cs_phase: '0', cs_shape: 'sine',
+        r_mean: '200', r_amplitude: '55', r_frequency: '0.08', r_phase: '0', r_shape: 'sine',
+        g_mean: '80', g_amplitude: '30', g_frequency: '0.06', g_phase: '0.1', g_shape: 'sine',
+        b_mean: '20', b_amplitude: '15', b_frequency: '0.04', b_phase: '0.2', b_shape: 'sine',
+        pp_mean: '6', pp_amplitude: '3', pp_frequency: '0.1', pp_phase: '0', pp_shape: 'sine',
+        ap_mean: '140', ap_amplitude: '40', ap_frequency: '0.07', ap_phase: '0', ap_shape: 'sine'
+      }
+    },
+    {
+      name: 'Deep sea',
+      values: {
+        speed: '0.4', quantize: '0',
+        cs_mean: '500', cs_amplitude: '150', cs_frequency: '0.02', cs_phase: '0', cs_shape: 'sine',
+        r_mean: '20', r_amplitude: '10', r_frequency: '0.03', r_phase: '0', r_shape: 'sine',
+        g_mean: '60', g_amplitude: '20', g_frequency: '0.04', g_phase: '0.2', g_shape: 'sine',
+        b_mean: '190', b_amplitude: '50', b_frequency: '0.05', b_phase: '0.4', b_shape: 'sine',
+        pp_mean: '5', pp_amplitude: '4', pp_frequency: '0.03', pp_phase: '0', pp_shape: 'triangle',
+        ap_mean: '190', ap_amplitude: '60', ap_frequency: '0.03', ap_phase: '0', ap_shape: 'sine'
+      }
+    },
+    {
+      name: 'Mono static',
+      values: {
+        speed: '2', quantize: '3',
+        cs_mean: '800', cs_amplitude: '0', cs_frequency: '0.1', cs_phase: '0', cs_shape: 'sine',
+        r_mean: '128', r_amplitude: '60', r_frequency: '0.15', r_phase: '0', r_shape: 'square',
+        g_mean: '128', g_amplitude: '60', g_frequency: '0.15', g_phase: '0', g_shape: 'square',
+        b_mean: '128', b_amplitude: '60', b_frequency: '0.15', b_phase: '0', b_shape: 'square',
+        pp_mean: '30', pp_amplitude: '10', pp_frequency: '0.2', pp_phase: '0', pp_shape: 'square',
+        ap_mean: '200', ap_amplitude: '0', ap_frequency: '0.1', ap_phase: '0', ap_shape: 'sine'
+      }
+    },
+    {
+      name: 'RGB pulse',
+      values: {
+        speed: '1.2', quantize: '0',
+        cs_mean: '700', cs_amplitude: '0', cs_frequency: '0.1', cs_phase: '0', cs_shape: 'sine',
+        r_mean: '128', r_amplitude: '120', r_frequency: '0.2', r_phase: '0', r_shape: 'sine',
+        g_mean: '128', g_amplitude: '120', g_frequency: '0.2', g_phase: '0.33', g_shape: 'sine',
+        b_mean: '128', b_amplitude: '120', b_frequency: '0.2', b_phase: '0.66', b_shape: 'sine',
+        pp_mean: '12', pp_amplitude: '5', pp_frequency: '0.1', pp_phase: '0', pp_shape: 'sine',
+        ap_mean: '160', ap_amplitude: '30', ap_frequency: '0.1', ap_phase: '0', ap_shape: 'sine'
+      }
+    }
+  ];
+
+  function renderBuiltinPresets(){
+    const container = document.getElementById('builtinPresets');
+    builtinPresets.forEach(preset => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = preset.name;
+      btn.addEventListener('click', () => applySettings(preset.values));
+      container.appendChild(btn);
+    });
+  }
+  renderBuiltinPresets();
 
   // --- Presets: capture / apply / persist (as a cookie) ------------------
   const COOKIE_NAME = 'sparklePresets';
