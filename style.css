@@ -117,30 +117,35 @@ main {
   color: var(--text);
   display: flex;
   align-items: center;
-  justify-content: space-between;
   user-select: none;
   gap: 8px;
 }
 .group > summary::-webkit-details-marker { display: none; }
-.group > summary .label { display: flex; align-items: center; min-width: 0; }
+.group > summary .label { display: flex; align-items: center; min-width: 0; flex: 1; }
 .group > summary .summary-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.group > summary::after {
-  content: "+";
-  color: var(--text-dim);
-  font-size: 13px;
-}
-.group[open] > summary::after { content: "–"; }
 .randomize-btn {
   background: transparent;
-  border: 1px solid var(--line);
+  border: none;
   color: var(--text-dim);
   font-size: 15px;
   line-height: 1;
-  padding: 5px 9px;
+  padding: 4px 6px;
   border-radius: 2px;
   cursor: pointer;
 }
-.randomize-btn:hover { border-color: var(--accent); color: var(--accent); }
+.randomize-btn:hover { color: var(--accent); }
+.toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1;
+  padding: 4px 6px;
+}
+.toggle-icon::after { content: "+"; }
+.group[open] .toggle-icon::after { content: "–"; }
+.toggle-icon:hover { color: var(--accent); }
 .group .swatch {
   display: inline-block;
   width: 8px; height: 8px;
@@ -223,7 +228,7 @@ canvas#scopeCanvas { display: block; width: 100%; height: 90px; }
   border: 1px solid var(--accent-dim);
   font-family: inherit;
   font-size: 18px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-radius: 2px;
   cursor: pointer;
   letter-spacing: 0.02em;
