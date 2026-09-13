@@ -152,10 +152,6 @@
     state.alpha = alphaValue(t);
   }
 
-  const ppLive = document.getElementById('pp-live');
-  const apLive = document.getElementById('ap-live');
-  const csLive = document.getElementById('cs-live');
-
   function updateRandomPixels(){
     const t = tick();
     updateColorRanges(t);
@@ -163,9 +159,6 @@
     const targetSize = sizeValue(t);
     ensureFilled(targetSize);
     const offset = offsetFor(targetSize);
-    csLive.textContent = targetSize + 'px';
-    ppLive.textContent = state.pixelUpdatePercent.toFixed(1) + '%';
-    apLive.textContent = Math.round(state.alpha);
 
     const totalPixels = targetSize * targetSize;
     const pixelsToUpdate = Math.round((state.pixelUpdatePercent / 100) * totalPixels);
