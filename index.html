@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sparkle — a noise instrument</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Sparkle</h1>
+  <p>
+    A field of randomly coloured squares, redrawn one noisy patch at a time. Inspired by a
+    <a href="http://www.timhead.net/art/art2000/81sce.htm" target="_blank" rel="noopener">Tim Head piece</a>,
+    built by <a href="https://glowinthedark.co.uk/" target="_blank" rel="noopener">Paul Harter</a>. Every channel —
+    red, green, blue, grid resolution, how many pixels change each frame, and how transparent they are — drifts
+    on its own wave. Save a setup you like to the list on the right.
+  </p>
+</header>
+
+<main>
+  <aside class="panel panel-left">
+    <div class="randomize-all-row">
+      <button type="button" id="randomizeAllBtn" class="randomize-all-btn">🎲 Randomize all</button>
+    </div>
+    <details class="group" open>
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--accent)"></span>Pattern</span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Wave speed</span><span class="val" id="val-speed">1.00×</span></div>
+          <input type="range" id="speed" min="0" max="4" step="0.05" value="1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Quantize levels (RGB only)</span><span class="val" id="val-quantize">off</span></div>
+          <input type="range" id="quantize" min="0" max="32" step="1" value="0">
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--sizecol)"></span>Grid size</span>
+        <span class="summary-right">
+          <span class="live" id="cs-live">100px</span>
+          <button type="button" class="dice-btn" data-randomize-group title="Randomize grid size">🎲</button>
+        </span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean (pixels per side)</span><span class="val" id="val-cs_mean">100</span></div>
+          <input type="range" id="cs_mean" min="100" max="2000" step="5" value="100">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-cs_amplitude">0</span></div>
+          <input type="range" id="cs_amplitude" min="0" max="950" step="5" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-cs_frequency">0.10</span></div>
+          <input type="range" id="cs_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-cs_phase">0.00</span></div>
+          <input type="range" id="cs_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="cs_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--red)"></span>Red</span>
+        <span class="summary-right">
+          <button type="button" class="dice-btn" data-randomize-group title="Randomize red">🎲</button>
+        </span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean</span><span class="val" id="val-r_mean">128</span></div>
+          <input type="range" id="r_mean" min="1" max="256" step="1" value="128">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-r_amplitude">1</span></div>
+          <input type="range" id="r_amplitude" min="0" max="128" step="1" value="1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-r_frequency">0.10</span></div>
+          <input type="range" id="r_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-r_phase">0.00</span></div>
+          <input type="range" id="r_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="r_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--green)"></span>Green</span>
+        <span class="summary-right">
+          <button type="button" class="dice-btn" data-randomize-group title="Randomize green">🎲</button>
+        </span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean</span><span class="val" id="val-g_mean">128</span></div>
+          <input type="range" id="g_mean" min="1" max="256" step="1" value="128">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-g_amplitude">1</span></div>
+          <input type="range" id="g_amplitude" min="0" max="128" step="1" value="1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-g_frequency">0.10</span></div>
+          <input type="range" id="g_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-g_phase">0.00</span></div>
+          <input type="range" id="g_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="g_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--blue)"></span>Blue</span>
+        <span class="summary-right">
+          <button type="button" class="dice-btn" data-randomize-group title="Randomize blue">🎲</button>
+        </span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean</span><span class="val" id="val-b_mean">128</span></div>
+          <input type="range" id="b_mean" min="1" max="256" step="1" value="128">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-b_amplitude">1</span></div>
+          <input type="range" id="b_amplitude" min="0" max="128" step="1" value="1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-b_frequency">0.10</span></div>
+          <input type="range" id="b_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-b_phase">0.00</span></div>
+          <input type="range" id="b_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="b_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--density)"></span>Density</span>
+        <span class="summary-right">
+          <span class="live" id="pp-live">10.0%</span>
+          <button type="button" class="dice-btn" data-randomize-group title="Randomize density">🎲</button>
+        </span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean (% pixels / frame)</span><span class="val" id="val-pp_mean">10</span></div>
+          <input type="range" id="pp_mean" min="0.1" max="100" step="0.1" value="10">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-pp_amplitude">0</span></div>
+          <input type="range" id="pp_amplitude" min="0" max="50" step="0.1" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-pp_frequency">0.10</span></div>
+          <input type="range" id="pp_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-pp_phase">0.00</span></div>
+          <input type="range" id="pp_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="pp_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
+        <span class="label"><span class="swatch" style="background:var(--alphacol)"></span>Transparency</span>
+        <span class="summary-right">
+          <span class="live" id="ap-live">128</span>
+          <button type="button" class="dice-btn" data-randomize-group title="Randomize transparency">🎲</button>
+        </span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean</span><span class="val" id="val-ap_mean">128</span></div>
+          <input type="range" id="ap_mean" min="1" max="256" step="1" value="128">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-ap_amplitude">0</span></div>
+          <input type="range" id="ap_amplitude" min="0" max="128" step="1" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-ap_frequency">0.10</span></div>
+          <input type="range" id="ap_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-ap_phase">0.00</span></div>
+          <input type="range" id="ap_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="ap_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <div class="scope">
+      <canvas id="scopeCanvas" width="300" height="90"></canvas>
+    </div>
+  </aside>
+
+  <div class="stage">
+    <div class="canvas-frame">
+      <canvas id="sparkleCanvas" width="100" height="100"></canvas>
+    </div>
+  </div>
+
+  <aside class="panel panel-right">
+    <div class="panel-right-header">
+      <div class="title">Presets</div>
+      <div class="subtitle">Quick start</div>
+      <div class="builtin-presets" id="builtinPresets"></div>
+      <div class="subtitle">Save current</div>
+      <div class="save-row">
+        <input type="text" id="presetName" placeholder="Name this setup" maxlength="60">
+        <button id="savePresetBtn">Save current</button>
+      </div>
+    </div>
+    <div class="cookie-note" id="cookieNote">Saved as a browser cookie on this device.</div>
+    <div class="preset-list" id="presetList">
+      <div class="preset-empty">No saved setups yet. Adjust the controls, name them, and save.</div>
+    </div>
+  </aside>
+</main>
+
+<script src="script.js"></script>
+
+</body>
+</html>

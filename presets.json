@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Calm drift",
+    "values": {
+      "speed": "0.3", "quantize": "0",
+      "cs_mean": "600", "cs_amplitude": "100", "cs_frequency": "0.03", "cs_phase": "0", "cs_shape": "sine",
+      "r_mean": "90", "r_amplitude": "15", "r_frequency": "0.04", "r_phase": "0", "r_shape": "sine",
+      "g_mean": "120", "g_amplitude": "15", "g_frequency": "0.05", "g_phase": "0.2", "g_shape": "sine",
+      "b_mean": "170", "b_amplitude": "15", "b_frequency": "0.03", "b_phase": "0.4", "b_shape": "sine",
+      "pp_mean": "3", "pp_amplitude": "1.5", "pp_frequency": "0.04", "pp_phase": "0", "pp_shape": "sine",
+      "ap_mean": "150", "ap_amplitude": "20", "ap_frequency": "0.03", "ap_phase": "0", "ap_shape": "sine"
+    }
+  },
+  {
+    "name": "Chaos storm",
+    "values": {
+      "speed": "3.5", "quantize": "0",
+      "cs_mean": "300", "cs_amplitude": "250", "cs_frequency": "0.6", "cs_phase": "0", "cs_shape": "square",
+      "r_mean": "128", "r_amplitude": "128", "r_frequency": "0.8", "r_phase": "0", "r_shape": "square",
+      "g_mean": "128", "g_amplitude": "128", "g_frequency": "0.7", "g_phase": "0.3", "g_shape": "sawtooth",
+      "b_mean": "128", "b_amplitude": "128", "b_frequency": "0.9", "b_phase": "0.6", "b_shape": "triangle",
+      "pp_mean": "60", "pp_amplitude": "40", "pp_frequency": "0.5", "pp_phase": "0", "pp_shape": "square",
+      "ap_mean": "180", "ap_amplitude": "80", "ap_frequency": "0.6", "ap_phase": "0", "ap_shape": "sawtooth"
+    }
+  },
+  {
+    "name": "Embers",
+    "values": {
+      "speed": "0.5", "quantize": "0",
+      "cs_mean": "250", "cs_amplitude": "50", "cs_frequency": "0.05", "cs_phase": "0", "cs_shape": "sine",
+      "r_mean": "200", "r_amplitude": "55", "r_frequency": "0.08", "r_phase": "0", "r_shape": "sine",
+      "g_mean": "80", "g_amplitude": "30", "g_frequency": "0.06", "g_phase": "0.1", "g_shape": "sine",
+      "b_mean": "20", "b_amplitude": "15", "b_frequency": "0.04", "b_phase": "0.2", "b_shape": "sine",
+      "pp_mean": "6", "pp_amplitude": "3", "pp_frequency": "0.1", "pp_phase": "0", "pp_shape": "sine",
+      "ap_mean": "140", "ap_amplitude": "40", "ap_frequency": "0.07", "ap_phase": "0", "ap_shape": "sine"
+    }
+  },
+  {
+    "name": "Deep sea",
+    "values": {
+      "speed": "0.4", "quantize": "0",
+      "cs_mean": "500", "cs_amplitude": "150", "cs_frequency": "0.02", "cs_phase": "0", "cs_shape": "sine",
+      "r_mean": "20", "r_amplitude": "10", "r_frequency": "0.03", "r_phase": "0", "r_shape": "sine",
+      "g_mean": "60", "g_amplitude": "20", "g_frequency": "0.04", "g_phase": "0.2", "g_shape": "sine",
+      "b_mean": "190", "b_amplitude": "50", "b_frequency": "0.05", "b_phase": "0.4", "b_shape": "sine",
+      "pp_mean": "5", "pp_amplitude": "4", "pp_frequency": "0.03", "pp_phase": "0", "pp_shape": "triangle",
+      "ap_mean": "190", "ap_amplitude": "60", "ap_frequency": "0.03", "ap_phase": "0", "ap_shape": "sine"
+    }
+  },
+  {
+    "name": "Mono static",
+    "values": {
+      "speed": "2", "quantize": "3",
+      "cs_mean": "800", "cs_amplitude": "0", "cs_frequency": "0.1", "cs_phase": "0", "cs_shape": "sine",
+      "r_mean": "128", "r_amplitude": "60", "r_frequency": "0.15", "r_phase": "0", "r_shape": "square",
+      "g_mean": "128", "g_amplitude": "60", "g_frequency": "0.15", "g_phase": "0", "g_shape": "square",
+      "b_mean": "128", "b_amplitude": "60", "b_frequency": "0.15", "b_phase": "0", "b_shape": "square",
+      "pp_mean": "30", "pp_amplitude": "10", "pp_frequency": "0.2", "pp_phase": "0", "pp_shape": "square",
+      "ap_mean": "200", "ap_amplitude": "0", "ap_frequency": "0.1", "ap_phase": "0", "ap_shape": "sine"
+    }
+  },
+  {
+    "name": "RGB pulse",
+    "values": {
+      "speed": "1.2", "quantize": "0",
+      "cs_mean": "700", "cs_amplitude": "0", "cs_frequency": "0.1", "cs_phase": "0", "cs_shape": "sine",
+      "r_mean": "128", "r_amplitude": "120", "r_frequency": "0.2", "r_phase": "0", "r_shape": "sine",
+      "g_mean": "128", "g_amplitude": "120", "g_frequency": "0.2", "g_phase": "0.33", "g_shape": "sine",
+      "b_mean": "128", "b_amplitude": "120", "b_frequency": "0.2", "b_phase": "0.66", "b_shape": "sine",
+      "pp_mean": "12", "pp_amplitude": "5", "pp_frequency": "0.1", "pp_phase": "0", "pp_shape": "sine",
+      "ap_mean": "160", "ap_amplitude": "30", "ap_frequency": "0.1", "ap_phase": "0", "ap_shape": "sine"
+    }
+  }
+]
