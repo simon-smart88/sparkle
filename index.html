@@ -25,7 +25,7 @@
 <main>
   <aside class="panel panel-left">
     <div class="randomize-all-row">
-      <button type="button" id="randomizeAllBtn" class="randomize-all-btn">↻ Randomize all</button>
+      <button type="button" id="randomizeAllBtn" class="randomize-all-btn"><span class="icon">↻</span>Randomise all</button>
     </div>
     <details class="group" open>
       <summary>
@@ -50,7 +50,7 @@
       <summary>
         <span class="label"><span class="swatch" style="background:var(--sizecol)"></span>Grid size</span>
         <span class="summary-right">
-          <button type="button" class="randomize-btn" data-randomize-group title="Randomize grid size">↻</button>
+          <button type="button" class="randomize-btn" data-randomize-group title="Randomise grid size">↻</button>
           <span class="toggle-icon" title="Customise grid size"></span>
         </span>
       </summary>
@@ -85,9 +85,46 @@
 
     <details class="group">
       <summary>
+        <span class="label"><span class="swatch" style="background:var(--density)"></span>Update</span>
+        <span class="summary-right">
+          <button type="button" class="randomize-btn" data-randomize-group title="Randomise update">↻</button>
+          <span class="toggle-icon" title="Customise update"></span>
+        </span>
+      </summary>
+      <div class="group-body">
+        <div class="field">
+          <div class="field-label"><span>Mean (% pixels / frame)</span><span class="val" id="val-pp_mean">10</span></div>
+          <input type="range" id="pp_mean" min="0.1" max="100" step="0.1" value="10">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Amplitude</span><span class="val" id="val-pp_amplitude">0</span></div>
+          <input type="range" id="pp_amplitude" min="0" max="50" step="0.1" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Frequency</span><span class="val" id="val-pp_frequency">0.10</span></div>
+          <input type="range" id="pp_frequency" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Phase offset</span><span class="val" id="val-pp_phase">0.00</span></div>
+          <input type="range" id="pp_phase" min="0" max="1" step="0.01" value="0">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Shape</span></div>
+          <select class="shape" id="pp_shape">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>
         <span class="label"><span class="swatch" style="background:var(--red)"></span>Red</span>
         <span class="summary-right">
-          <button type="button" class="randomize-btn" data-randomize-group title="Randomize red">↻</button>
+          <button type="button" class="randomize-btn" data-randomize-group title="Randomise red">↻</button>
           <span class="toggle-icon" title="Customise red"></span>
         </span>
       </summary>
@@ -124,7 +161,7 @@
       <summary>
         <span class="label"><span class="swatch" style="background:var(--green)"></span>Green</span>
         <span class="summary-right">
-          <button type="button" class="randomize-btn" data-randomize-group title="Randomize green">↻</button>
+          <button type="button" class="randomize-btn" data-randomize-group title="Randomise green">↻</button>
           <span class="toggle-icon" title="Customise green"></span>
         </span>
       </summary>
@@ -161,7 +198,7 @@
       <summary>
         <span class="label"><span class="swatch" style="background:var(--blue)"></span>Blue</span>
         <span class="summary-right">
-          <button type="button" class="randomize-btn" data-randomize-group title="Randomize blue">↻</button>
+          <button type="button" class="randomize-btn" data-randomize-group title="Randomise blue">↻</button>
           <span class="toggle-icon" title="Customise blue"></span>
         </span>
       </summary>
@@ -196,46 +233,9 @@
 
     <details class="group">
       <summary>
-        <span class="label"><span class="swatch" style="background:var(--density)"></span>Density</span>
-        <span class="summary-right">
-          <button type="button" class="randomize-btn" data-randomize-group title="Randomize density">↻</button>
-          <span class="toggle-icon" title="Customise density"></span>
-        </span>
-      </summary>
-      <div class="group-body">
-        <div class="field">
-          <div class="field-label"><span>Mean (% pixels / frame)</span><span class="val" id="val-pp_mean">10</span></div>
-          <input type="range" id="pp_mean" min="0.1" max="100" step="0.1" value="10">
-        </div>
-        <div class="field">
-          <div class="field-label"><span>Amplitude</span><span class="val" id="val-pp_amplitude">0</span></div>
-          <input type="range" id="pp_amplitude" min="0" max="50" step="0.1" value="0">
-        </div>
-        <div class="field">
-          <div class="field-label"><span>Frequency</span><span class="val" id="val-pp_frequency">0.10</span></div>
-          <input type="range" id="pp_frequency" min="0.01" max="1" step="0.01" value="0.1">
-        </div>
-        <div class="field">
-          <div class="field-label"><span>Phase offset</span><span class="val" id="val-pp_phase">0.00</span></div>
-          <input type="range" id="pp_phase" min="0" max="1" step="0.01" value="0">
-        </div>
-        <div class="field">
-          <div class="field-label"><span>Shape</span></div>
-          <select class="shape" id="pp_shape">
-            <option value="sine">Sine</option>
-            <option value="triangle">Triangle</option>
-            <option value="square">Square</option>
-            <option value="sawtooth">Sawtooth</option>
-          </select>
-        </div>
-      </div>
-    </details>
-
-    <details class="group">
-      <summary>
         <span class="label"><span class="swatch" style="background:var(--alphacol)"></span>Transparency</span>
         <span class="summary-right">
-          <button type="button" class="randomize-btn" data-randomize-group title="Randomize transparency">↻</button>
+          <button type="button" class="randomize-btn" data-randomize-group title="Randomise transparency">↻</button>
           <span class="toggle-icon" title="Customise transparency"></span>
         </span>
       </summary>
