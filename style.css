@@ -21,7 +21,8 @@ html, body {
   height: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 body {
   display: flex;
