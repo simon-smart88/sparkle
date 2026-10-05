@@ -57,6 +57,57 @@
   window.addEventListener('resize', sizeFrame);
   sizeFrame();
 
+  // --- Full screen mode -----------------------------------------------------
+  // Hides the header and side panels so the stage fills the window, and asks
+  // the browser for real full screen where supported. Esc or F exits.
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
+  let idleTimer = null;
+
+  function showControlsBriefly(){
+    fullscreenBtn.classList.add('visible');
+    document.body.classList.remove('hide-cursor');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      fullscreenBtn.classList.remove('visible');
+      document.body.classList.add('hide-cursor');
+    }, 2000);
+  }
+
+  function setFullscreen(on){
+    document.body.classList.toggle('is-fullscreen', on);
+    fullscreenBtn.textContent = on ? '✕' : '⛶';
+    fullscreenBtn.title = on ? 'Exit full screen (Esc)' : 'Full screen (F)';
+    if (on){
+      showControlsBriefly();
+      if (document.documentElement.requestFullscreen && !document.fullscreenElement){
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    } else {
+      clearTimeout(idleTimer);
+      fullscreenBtn.classList.remove('visible');
+      document.body.classList.remove('hide-cursor');
+      if (document.fullscreenElement && document.exitFullscreen){
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+    sizeFrame();
+  }
+
+  const isFullscreen = () => document.body.classList.contains('is-fullscreen');
+
+  fullscreenBtn.addEventListener('click', () => setFullscreen(!isFullscreen()));
+  document.addEventListener('fullscreenchange', () => {
+    // Browser full screen ended (e.g. via Esc) — leave our mode too.
+    if (!document.fullscreenElement && isFullscreen()) setFullscreen(false);
+  });
+  document.addEventListener('keydown', e => {
+    const tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+    if (e.key === 'f' || e.key === 'F') setFullscreen(!isFullscreen());
+    else if (e.key === 'Escape' && isFullscreen()) setFullscreen(false);
+  });
+  document.addEventListener('mousemove', () => { if (isFullscreen()) showControlsBriefly(); });
+
   // --- Waveform shapes ------------------------------------------------------
   function shapeValue(shape, x){
     const f = x - Math.floor(x);
