@@ -38,10 +38,20 @@
   // --- Responsive square canvas frame -------------------------------------
   // Only the *display* resolution changes here, and only on an actual window
   // resize — not on every grid-size wave tick.
+  const narrowLayout = window.matchMedia('(max-width: 900px)');
   function sizeFrame(){
     const rect = stage.getBoundingClientRect();
     const pad = 8;
-    const available = Math.max(120, Math.min(rect.width, rect.height) - pad * 2);
+    let available;
+    if (narrowLayout.matches && !document.body.classList.contains('is-fullscreen')){
+      // Stacked mobile layout: the stage has no fixed height (its height comes
+      // from the frame), so size the frame to the full content width instead.
+      const cs = getComputedStyle(stage);
+      available = rect.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    } else {
+      available = Math.min(rect.width, rect.height) - pad * 2;
+    }
+    available = Math.max(120, available);
     const cssSize = Math.floor(available);
     frame.style.width = cssSize + 'px';
     frame.style.height = cssSize + 'px';
