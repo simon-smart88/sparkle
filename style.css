@@ -151,14 +151,14 @@ body.is-fullscreen.hide-cursor { cursor: none; }
 }
 .group > summary::-webkit-details-marker { display: none; }
 .group > summary .label { display: flex; align-items: center; min-width: 0; flex: 1; }
-.group > summary .summary-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.group > summary .summary-right { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
 .randomize-btn {
   background: transparent;
   border: none;
   color: var(--text-dim);
-  font-size: 15px;
+  font-size: 22px;
   line-height: 1;
-  padding: 4px 6px;
+  padding: 2px 3px;
   border-radius: 2px;
   cursor: pointer;
 }
@@ -168,9 +168,9 @@ body.is-fullscreen.hide-cursor { cursor: none; }
   align-items: center;
   justify-content: center;
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: 22px;
   line-height: 1;
-  padding: 4px 6px;
+  padding: 2px 3px;
 }
 .toggle-icon::after { content: "+"; }
 .group[open] .toggle-icon::after { content: "–"; }
