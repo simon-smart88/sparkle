@@ -177,8 +177,9 @@ body.is-fullscreen.hide-cursor { cursor: none; }
 .toggle-icon:hover { color: var(--accent); }
 .group .swatch {
   display: inline-block;
-  width: 12px; height: 12px;
+  width: 15px; height: 15px;
   border-radius: 50%;
+  background: var(--c);
   margin-right: 10px;
   flex-shrink: 0;
 }
@@ -209,7 +210,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--c, var(--accent));
   cursor: pointer;
   margin-top: -5px;
 }
@@ -218,15 +219,13 @@ input[type="range"]::-moz-range-thumb {
   height: 12px;
   border: none;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--c, var(--accent));
   cursor: pointer;
 }
 input[type="range"]::-moz-range-track {
   height: 2px;
   background: var(--line);
 }
-#speed::-webkit-slider-thumb { background: var(--text-dim); }
-#speed::-moz-range-thumb { background: var(--text-dim); }
 
 select.shape {
   width: 100%;
