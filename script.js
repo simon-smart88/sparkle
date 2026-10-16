@@ -440,35 +440,50 @@
   }
   loadBuiltinPresets().then(renderBuiltinPresets);
 
-  // --- Presets: capture / apply / persist (as a cookie) ------------------
-  const COOKIE_NAME = 'sparklePresets';
-  const COOKIE_MAX_BYTES = 3800; // stay comfortably under the ~4KB per-cookie limit
+  // --- Presets: capture / apply / persist (in localStorage) --------------
+  // Presets used to live in a cookie, but the ~4KB cookie limit only fit
+  // about three; localStorage gives megabytes. Older cookie presets are
+  // migrated across on first load.
+  const STORAGE_KEY = 'sparklePresets';
+  const LEGACY_COOKIE_NAME = 'sparklePresets';
 
   function getCookie(name){
     const escaped = name.replace(/([.$?*|{}()\[\]\\/+^])/g, '\\$1');
     const match = document.cookie.match(new RegExp('(?:^|; )' + escaped + '=([^;]*)'));
     return match ? decodeURIComponent(match[1]) : null;
   }
-  function setCookie(name, value, days){
-    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
-    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+  function deleteCookie(name){
+    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
   }
 
-  const cookiesAvailable = (() => {
+  const storageAvailable = (() => {
     try {
-      document.cookie = 'sparkleCookieTest=1; path=/; SameSite=Lax';
-      const ok = document.cookie.indexOf('sparkleCookieTest=') !== -1;
-      document.cookie = 'sparkleCookieTest=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      return ok;
+      localStorage.setItem('sparkleStorageTest', '1');
+      localStorage.removeItem('sparkleStorageTest');
+      return true;
     } catch (e){
       return false;
     }
   })();
-  let memoryPresets = []; // fallback if cookies aren't available (e.g. some local file:// views)
+  let memoryPresets = []; // fallback if localStorage isn't available (e.g. some private modes)
 
-  if (!cookiesAvailable){
+  if (storageAvailable){
+    try {
+      const legacy = getCookie(LEGACY_COOKIE_NAME);
+      if (legacy){
+        const legacyList = JSON.parse(legacy);
+        const current = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const ids = new Set(current.map(p => p.id));
+        const merged = legacyList.filter(p => !ids.has(p.id)).concat(current);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        deleteCookie(LEGACY_COOKIE_NAME);
+      }
+    } catch (e){
+      console.error('Could not migrate presets cookie', e);
+    }
+  } else {
     document.getElementById('cookieNote').textContent =
-      "Cookies aren't available here, so saved setups will only last this session.";
+      "Browser storage isn't available here, so saved setups will only last this session.";
   }
 
   function captureCurrentSettings(){
@@ -487,34 +502,35 @@
   }
 
   async function loadPresets(){
-    if (!cookiesAvailable) return memoryPresets;
+    if (!storageAvailable) return memoryPresets;
     try {
-      const raw = getCookie(COOKIE_NAME);
+      const raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : [];
     } catch (e){
       return [];
     }
   }
 
-  // Returns the (possibly trimmed) list actually persisted, since cookies
-  // have a hard ~4KB size limit — oldest presets are dropped first if needed.
+  // Returns the list actually persisted. If storage is full, the oldest
+  // presets are dropped until it fits.
   async function persistPresets(list){
-    if (!cookiesAvailable){
+    if (!storageAvailable){
       memoryPresets = list;
       return list;
     }
     const trimmed = list.slice();
-    let serialized = JSON.stringify(trimmed);
-    while (serialized.length > COOKIE_MAX_BYTES && trimmed.length > 0){
-      trimmed.shift();
-      serialized = JSON.stringify(trimmed);
+    while (true){
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+        return trimmed;
+      } catch (e){
+        if (!trimmed.length){
+          console.error('Could not save presets', e);
+          return trimmed;
+        }
+        trimmed.shift();
+      }
     }
-    try {
-      setCookie(COOKIE_NAME, serialized, 365 * 5);
-    } catch (e){
-      console.error('Could not save presets cookie', e);
-    }
-    return trimmed;
   }
 
   function formatTime(ts){
