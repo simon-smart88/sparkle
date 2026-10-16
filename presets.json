@@ -2,7 +2,7 @@
   {
     "name": "Calm drift",
     "values": {
-      "speed": "0.3", "quantize": "0",
+      "speed": "0.3",
       "cs_mean": "600", "cs_amplitude": "100", "cs_frequency": "0.03", "cs_phase": "0", "cs_shape": "sine",
       "r_mean": "90", "r_amplitude": "15", "r_frequency": "0.04", "r_phase": "0", "r_shape": "sine",
       "g_mean": "120", "g_amplitude": "15", "g_frequency": "0.05", "g_phase": "0.2", "g_shape": "sine",
@@ -14,7 +14,7 @@
   {
     "name": "Chaos storm",
     "values": {
-      "speed": "3.5", "quantize": "0",
+      "speed": "3.5",
       "cs_mean": "300", "cs_amplitude": "250", "cs_frequency": "0.6", "cs_phase": "0", "cs_shape": "square",
       "r_mean": "128", "r_amplitude": "128", "r_frequency": "0.8", "r_phase": "0", "r_shape": "square",
       "g_mean": "128", "g_amplitude": "128", "g_frequency": "0.7", "g_phase": "0.3", "g_shape": "sawtooth",
@@ -26,7 +26,7 @@
   {
     "name": "Embers",
     "values": {
-      "speed": "0.5", "quantize": "0",
+      "speed": "0.5",
       "cs_mean": "250", "cs_amplitude": "50", "cs_frequency": "0.05", "cs_phase": "0", "cs_shape": "sine",
       "r_mean": "200", "r_amplitude": "55", "r_frequency": "0.08", "r_phase": "0", "r_shape": "sine",
       "g_mean": "80", "g_amplitude": "30", "g_frequency": "0.06", "g_phase": "0.1", "g_shape": "sine",
@@ -38,7 +38,7 @@
   {
     "name": "Deep sea",
     "values": {
-      "speed": "0.4", "quantize": "0",
+      "speed": "0.4",
       "cs_mean": "500", "cs_amplitude": "150", "cs_frequency": "0.02", "cs_phase": "0", "cs_shape": "sine",
       "r_mean": "20", "r_amplitude": "10", "r_frequency": "0.03", "r_phase": "0", "r_shape": "sine",
       "g_mean": "60", "g_amplitude": "20", "g_frequency": "0.04", "g_phase": "0.2", "g_shape": "sine",
@@ -50,7 +50,7 @@
   {
     "name": "Mono static",
     "values": {
-      "speed": "2", "quantize": "3",
+      "speed": "2",
       "cs_mean": "800", "cs_amplitude": "0", "cs_frequency": "0.1", "cs_phase": "0", "cs_shape": "sine",
       "r_mean": "128", "r_amplitude": "60", "r_frequency": "0.15", "r_phase": "0", "r_shape": "square",
       "g_mean": "128", "g_amplitude": "60", "g_frequency": "0.15", "g_phase": "0", "g_shape": "square",
@@ -62,7 +62,7 @@
   {
     "name": "RGB pulse",
     "values": {
-      "speed": "1.2", "quantize": "0",
+      "speed": "1.2",
       "cs_mean": "700", "cs_amplitude": "0", "cs_frequency": "0.1", "cs_phase": "0", "cs_shape": "sine",
       "r_mean": "128", "r_amplitude": "120", "r_frequency": "0.2", "r_phase": "0", "r_shape": "sine",
       "g_mean": "128", "g_amplitude": "120", "g_frequency": "0.2", "g_phase": "0.33", "g_shape": "sine",

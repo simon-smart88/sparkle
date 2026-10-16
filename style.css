@@ -225,6 +225,8 @@ input[type="range"]::-moz-range-track {
   height: 2px;
   background: var(--line);
 }
+#speed::-webkit-slider-thumb { background: var(--text-dim); }
+#speed::-moz-range-thumb { background: var(--text-dim); }
 
 select.shape {
   width: 100%;

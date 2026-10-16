@@ -32,7 +32,7 @@
     pp_mean: 10, pp_amplitude: 0, pp_frequency: 0.1, pp_phase: 0, pp_shape: 'sine',
     ap_mean: 128, ap_amplitude: 0, ap_frequency: 0.1, ap_phase: 0, ap_shape: 'sine',
     cs_mean: 100, cs_amplitude: 0, cs_frequency: 0.1, cs_phase: 0, cs_shape: 'sine',
-    pixelUpdatePercent: 10, alpha: 128, speed: 1, quantize: 0
+    pixelUpdatePercent: 10, alpha: 128, speed: 1
   };
 
   // --- Responsive square canvas frame -------------------------------------
@@ -137,13 +137,6 @@
   function clampRange(v, min, max){ return Math.max(min, Math.min(max, v)); }
   function clamp255(v){ return clampRange(v, 0, 255); }
 
-  function quantizeValue(v){
-    const steps = state.quantize;
-    if (!steps) return v;
-    const levelSize = 255 / steps;
-    return Math.round(v / levelSize) * levelSize;
-  }
-
   function setRandomPixel(x, y){
     const idx = (y * BACKING_SIZE + x) * 4;
     backingImageData.data[idx]     = Math.floor(Math.random() * r_range);
@@ -180,19 +173,19 @@
     return clockOffset;
   }
 
-  // RGB channel value: 0-255, clamped and (optionally) quantized
+  // RGB channel value: 0-255, clamped
   function channelValue(mean, amp, freq, phase, shape, t){
     const wave = shapeValue(shape, t * freq + phase);
-    return quantizeValue(clamp255(Math.round(mean + amp * wave)));
+    return clamp255(Math.round(mean + amp * wave));
   }
 
-  // Pixel-update-percent value: 0.1-100, no quantize
+  // Pixel-update-percent value: 0.1-100
   function percentValue(t){
     const wave = shapeValue(state.pp_shape, t * state.pp_frequency + state.pp_phase);
     return clampRange(state.pp_mean + state.pp_amplitude * wave, 0.1, 100);
   }
 
-  // Transparency (alpha) value: 1-256, no quantize
+  // Transparency (alpha) value: 1-256
   function alphaValue(t){
     const wave = shapeValue(state.ap_shape, t * state.ap_frequency + state.ap_phase);
     return clampRange(Math.round(state.ap_mean + state.ap_amplitude * wave), 1, 256);
@@ -328,7 +321,7 @@
 
   // --- Wire up controls -------------------------------------------------
   const controlIds = [
-    'speed', 'quantize',
+    'speed',
     'cs_mean', 'cs_amplitude', 'cs_frequency', 'cs_phase', 'cs_shape',
     'r_mean', 'r_amplitude', 'r_frequency', 'r_phase', 'r_shape',
     'g_mean', 'g_amplitude', 'g_frequency', 'g_phase', 'g_shape',
@@ -351,7 +344,6 @@
   }
 
   bindRange('speed', v => state.speed = parseFloat(v), v => parseFloat(v).toFixed(2) + '×');
-  bindRange('quantize', v => state.quantize = parseInt(v), v => v === '0' ? 'off' : v);
 
   bindRange('cs_mean', v => state.cs_mean = parseInt(v));
   bindRange('cs_amplitude', v => state.cs_amplitude = parseInt(v));
