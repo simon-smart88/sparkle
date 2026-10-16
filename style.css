@@ -10,9 +10,9 @@
   --red: #ff6b6b;
   --green: #6bff9a;
   --blue: #6bb3ff;
-  --density: #b9bdc4;
-  --alphacol: #f2f3f5;
-  --sizecol: #c9a6ff;
+  --density: #ff9a3c;
+  --alphacol: #40e0d0;
+  --sizecol: #b47cff;
   --danger: #ff6b6b;
 }
 * { box-sizing: border-box; }
@@ -177,7 +177,7 @@ body.is-fullscreen.hide-cursor { cursor: none; }
 .toggle-icon:hover { color: var(--accent); }
 .group .swatch {
   display: inline-block;
-  width: 8px; height: 8px;
+  width: 12px; height: 12px;
   border-radius: 50%;
   margin-right: 10px;
   flex-shrink: 0;

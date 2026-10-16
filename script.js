@@ -242,7 +242,7 @@
   }
 
   // Live oscilloscope-style preview of the RGB waveforms, plus density,
-  // transparency and grid size overlaid as dashed traces (each normalised
+  // transparency and grid size overlaid as extra traces (each normalised
   // to its own range so they stay legible on one chart).
   function drawScope(t0){
     const w = scope.width, h = scope.height;
@@ -255,17 +255,25 @@
     sctx.lineTo(w, h / 2);
     sctx.stroke();
 
+    // When a line's settings panel is open, draw that line thicker and fade the rest.
+    const openGroup = document.querySelector('.group[open][data-trace]');
+    const focused = openGroup ? openGroup.dataset.trace : null;
+    function traceStyle(key, baseWidth){
+      sctx.lineWidth = focused === key ? 2.2 : baseWidth;
+      sctx.globalAlpha = focused && focused !== key ? 0.7 : 1;
+    }
+
     const windowSeconds = 6;
     const channels = [
-      { mean: state.r_mean, amp: state.r_amplitude, freq: state.r_frequency, phase: state.r_phase, shape: state.r_shape, color: getCss('--red') },
-      { mean: state.g_mean, amp: state.g_amplitude, freq: state.g_frequency, phase: state.g_phase, shape: state.g_shape, color: getCss('--green') },
-      { mean: state.b_mean, amp: state.b_amplitude, freq: state.b_frequency, phase: state.b_phase, shape: state.b_shape, color: getCss('--blue') }
+      { mean: state.r_mean, amp: state.r_amplitude, freq: state.r_frequency, phase: state.r_phase, shape: state.r_shape, color: getCss('--red'), key: 'r' },
+      { mean: state.g_mean, amp: state.g_amplitude, freq: state.g_frequency, phase: state.g_phase, shape: state.g_shape, color: getCss('--green'), key: 'g' },
+      { mean: state.b_mean, amp: state.b_amplitude, freq: state.b_frequency, phase: state.b_phase, shape: state.b_shape, color: getCss('--blue'), key: 'b' }
     ];
 
     channels.forEach(c => {
       sctx.beginPath();
       sctx.strokeStyle = c.color;
-      sctx.lineWidth = 1.5;
+      traceStyle(c.key, 1.2);
       for (let px = 0; px <= w; px++){
         const t = t0 - windowSeconds + (px / w) * windowSeconds;
         const v = channelValue(c.mean, c.amp, c.freq, c.phase, c.shape, t);
@@ -275,11 +283,9 @@
       sctx.stroke();
     });
 
-    sctx.setLineDash([3, 3]);
-
     sctx.beginPath();
     sctx.strokeStyle = getCss('--density');
-    sctx.lineWidth = 1;
+    traceStyle('update', 0.8);
     for (let px = 0; px <= w; px++){
       const t = t0 - windowSeconds + (px / w) * windowSeconds;
       const wave = shapeValue(state.pp_shape, t * state.pp_frequency + state.pp_phase);
@@ -291,7 +297,7 @@
 
     sctx.beginPath();
     sctx.strokeStyle = getCss('--alphacol');
-    sctx.lineWidth = 1;
+    traceStyle('alpha', 0.8);
     for (let px = 0; px <= w; px++){
       const t = t0 - windowSeconds + (px / w) * windowSeconds;
       const wave = shapeValue(state.ap_shape, t * state.ap_frequency + state.ap_phase);
@@ -303,7 +309,7 @@
 
     sctx.beginPath();
     sctx.strokeStyle = getCss('--sizecol');
-    sctx.lineWidth = 1;
+    traceStyle('size', 0.8);
     for (let px = 0; px <= w; px++){
       const t = t0 - windowSeconds + (px / w) * windowSeconds;
       const wave = shapeValue(state.cs_shape, t * state.cs_frequency + state.cs_phase);
@@ -313,7 +319,7 @@
     }
     sctx.stroke();
 
-    sctx.setLineDash([]);
+    sctx.globalAlpha = 1;
   }
 
   function getCss(varName){
