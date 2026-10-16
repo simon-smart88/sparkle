@@ -64,6 +64,44 @@
     }
   }
   new ResizeObserver(sizeFrame).observe(stage);
+
+  // --- Grid size slider ranges ----------------------------------------------
+  // On the narrow (mobile) layout the grid size sliders cover 30% of the
+  // desktop range. Presets always store desktop values and are converted
+  // when applied or captured, so they behave the same on every device.
+  const GRID_DESKTOP = { min: 100, max: 2000, ampMax: 950, step: 5 };
+  const GRID_MOBILE_SCALE = 0.3;
+  const GRID_SCALED_IDS = ['cs_mean', 'cs_amplitude'];
+  function gridScale(){ return narrowLayout.matches ? GRID_MOBILE_SCALE : 1; }
+  function gridStep(){ return narrowLayout.matches ? 1 : GRID_DESKTOP.step; }
+  function gridMin(){ return Math.round(GRID_DESKTOP.min * gridScale()); }
+  function gridMax(){ return Math.round(GRID_DESKTOP.max * gridScale()); }
+  function toSliderGrid(desktopValue){
+    const step = gridStep();
+    return Math.round(desktopValue * gridScale() / step) * step;
+  }
+  function toDesktopGrid(sliderValue){
+    const step = GRID_DESKTOP.step;
+    return Math.round(sliderValue / gridScale() / step) * step;
+  }
+  let gridSliderScale = 1; // the scale the grid sliders currently use
+  function updateGridSliders(){
+    const scale = gridScale();
+    if (scale === gridSliderScale) return;
+    const mean = document.getElementById('cs_mean');
+    const amp = document.getElementById('cs_amplitude');
+    const desktopMean = parseFloat(mean.value) / gridSliderScale;
+    const desktopAmp = parseFloat(amp.value) / gridSliderScale;
+    gridSliderScale = scale;
+    const step = gridStep();
+    mean.min = gridMin(); mean.max = gridMax(); mean.step = step;
+    amp.max = Math.round(GRID_DESKTOP.ampMax * scale); amp.step = step;
+    mean.value = toSliderGrid(desktopMean);
+    amp.value = toSliderGrid(desktopAmp);
+    mean.dispatchEvent(new Event('input'));
+    amp.dispatchEvent(new Event('input'));
+  }
+  narrowLayout.addEventListener('change', updateGridSliders);
   window.addEventListener('resize', sizeFrame);
   sizeFrame();
 
@@ -191,11 +229,13 @@
     return clampRange(Math.round(state.ap_mean + state.ap_amplitude * wave), 1, 256);
   }
 
-  // Grid-size (pixels per side) value: 100-2000, rounded to the nearest 5
+  // Grid-size (pixels per side) value, clamped to the current slider range
+  // and rounded to the slider step
   function sizeValue(t){
     const wave = shapeValue(state.cs_shape, t * state.cs_frequency + state.cs_phase);
-    const raw = clampRange(state.cs_mean + state.cs_amplitude * wave, 100, 2000);
-    return Math.round(raw / 5) * 5;
+    const raw = clampRange(state.cs_mean + state.cs_amplitude * wave, gridMin(), gridMax());
+    const step = gridStep();
+    return Math.round(raw / step) * step;
   }
 
   function updateColorRanges(t){
@@ -306,8 +346,8 @@
     for (let px = 0; px <= w; px++){
       const t = t0 - windowSeconds + (px / w) * windowSeconds;
       const wave = shapeValue(state.cs_shape, t * state.cs_frequency + state.cs_phase);
-      const v = clampRange(state.cs_mean + state.cs_amplitude * wave, 100, 2000);
-      const y = h - ((v - 100) / 1900) * h;
+      const v = clampRange(state.cs_mean + state.cs_amplitude * wave, gridMin(), gridMax());
+      const y = h - ((v - gridMin()) / (gridMax() - gridMin())) * h;
       if (px === 0) sctx.moveTo(px, y); else sctx.lineTo(px, y);
     }
     sctx.stroke();
@@ -350,6 +390,7 @@
   bindRange('cs_frequency', v => state.cs_frequency = parseFloat(v), v => parseFloat(v).toFixed(2));
   bindRange('cs_phase', v => state.cs_phase = parseFloat(v), v => parseFloat(v).toFixed(2));
   bindSelect('cs_shape', v => state.cs_shape = v);
+  updateGridSliders();
 
   ['r', 'g', 'b'].forEach(ch => {
     bindRange(`${ch}_mean`, v => state[`${ch}_mean`] = parseInt(v));
@@ -489,6 +530,7 @@
   function captureCurrentSettings(){
     const snapshot = {};
     controlIds.forEach(id => { snapshot[id] = document.getElementById(id).value; });
+    GRID_SCALED_IDS.forEach(id => { snapshot[id] = String(toDesktopGrid(parseFloat(snapshot[id]))); });
     return snapshot;
   }
 
@@ -496,7 +538,7 @@
     controlIds.forEach(id => {
       if (!(id in settings)) return;
       const el = document.getElementById(id);
-      el.value = settings[id];
+      el.value = GRID_SCALED_IDS.includes(id) ? toSliderGrid(parseFloat(settings[id])) : settings[id];
       el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input'));
     });
   }
