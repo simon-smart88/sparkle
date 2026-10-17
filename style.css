@@ -81,7 +81,7 @@ main {
 }
 .canvas-frame {
   position: relative;
-  background: #000;
+  background: #fff;
   border: 1px solid var(--line);
   box-shadow: 0 0 0 8px var(--panel), 0 0 40px rgba(0,0,0,0.5);
   flex-shrink: 0;

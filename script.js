@@ -267,7 +267,10 @@
     dataCtx.putImageData(backingImageData, 0, 0, offset, offset, targetSize, targetSize);
 
     // Crop that centred square and scale it up (nearest-neighbour) onto the visible canvas.
+    // Clear first: drawing translucent pixels over the previous frame would stack
+    // them up, so transparency would act like a slower update rate, not opacity.
     visCtx.imageSmoothingEnabled = false;
+    visCtx.clearRect(0, 0, visCanvas.width, visCanvas.height);
     visCtx.drawImage(dataCanvas, offset, offset, targetSize, targetSize, 0, 0, visCanvas.width, visCanvas.height);
 
     drawScope(t);
