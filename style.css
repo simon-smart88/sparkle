@@ -394,8 +394,12 @@ canvas#scopeCanvas { display: block; width: 100%; height: 90px; }
 ::-webkit-scrollbar-thumb { background: var(--line); }
 
 @media (max-width: 900px) {
-  main { flex-direction: column; overflow-y: auto; }
-  body { overflow: auto; }
+  /* Scroll the whole page (not just main) so the header scrolls away. */
+  html, body { height: auto; }
+  main { flex-direction: column; flex: none; }
+  body { overflow: visible; }
+  html:has(body.is-fullscreen), body.is-fullscreen { height: 100%; }
+  body.is-fullscreen main { flex: 1; }
   .panel { width: 100%; }
   .panel-left { border-right: none; border-bottom: 1px solid var(--line); }
   .panel-right { border-left: none; border-top: 1px solid var(--line); }
